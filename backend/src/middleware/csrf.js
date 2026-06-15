@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const fp = require('fastify-plugin');
 const SECRET = process.env.CSRF_SECRET || require('../config').jwt.secret;
 
 function generateToken() {
@@ -38,4 +39,4 @@ function csrfProtection(fastify, opts, done) {
   done();
 }
 
-module.exports = { generateToken, csrfProtection };
+module.exports = { generateToken, csrfProtection: fp(csrfProtection) };
