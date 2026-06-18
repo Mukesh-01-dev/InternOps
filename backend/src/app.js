@@ -6,8 +6,10 @@ const config = require('./config');
 const pool = require('./config/db');
 const metrics = require('./utils/metrics');
 const { initializeWebSocket } = require('./websocket');
+const { redisInstance } = require('./config/redis');
 
 const app = Fastify({
+  trustProxy: true,
   logger:
     config.nodeEnv === 'development'
       ? { transport: { target: 'pino-pretty' } }
@@ -51,8 +53,18 @@ app.register(async function sanitizationPlugin(instance) {
 });
 
 app.register(require('@fastify/rate-limit'), {
-  max: 1000,
-  timeWindow: '1 minute',
+  max: config.rateLimit.globalMax,
+  timeWindow: config.rateLimit.timeWindow,
+  redis: redisInstance, // Centralized storage
+});
+
+// 2. Auth-specific rate limit - use Redis for shared state
+app.register(require('@fastify/rate-limit'), {
+  max: config.rateLimit.authMax,
+  timeWindow: config.rateLimit.timeWindow,
+  keyGenerator: (request) => request.ip + '_auth',
+  prefix: '/api/auth',
+  redis: redisInstance, // Centralized storage
 });
 
 app.register(require('@fastify/cookie'));

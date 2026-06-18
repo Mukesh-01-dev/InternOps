@@ -6,11 +6,15 @@ const { createAuditLog, extractRequestInfo } = require('../../utils/audit');
 
 async function forgotPassword(email, requestInfo) {
   const user = await userRepo.findByEmail(email);
+
   if (!user) {
     return;
   }
+
   const token = await repo.createResetToken(user.id);
+
   await emailService.sendPasswordReset(email, token);
+
   await createAuditLog({
     userId: user.id,
     action: 'PASSWORD_RESET_REQUESTED',
