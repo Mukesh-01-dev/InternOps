@@ -229,7 +229,11 @@ export default function DashboardLayout() {
               onClick={() => setDark((d) => !d)}
               className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-lg"
             >
-              {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {dark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </button>
             <Link
               to="/notifications"
