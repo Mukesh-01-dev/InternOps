@@ -9,6 +9,7 @@ const { verifyEmail, sendVerificationEmail } = require('./verificationService');
 const repo = require('./repository');
 const { forgotPassword, resetPassword } = require('./resetService');
 const isProduction = process.env.NODE_ENV === 'production';
+const { createAuditLog } = require('../../utils/audit');
 async function routes(fastify) {
   // Register
   fastify.post(
@@ -56,15 +57,35 @@ async function routes(fastify) {
         req.headers['user-agent']
       );
       reply.setCookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'strict',
-        path: '/api/auth/refresh',
-      });
-      return {
-        accessToken: result.accessToken,
-        user: result.user,
-      };
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: 'strict',
+  path: '/api/auth/refresh',
+});
+
+const response = {
+  accessToken: result.accessToken,
+  user: result.user,
+};
+
+reply.send(response);
+
+req.log.info(
+  {
+    action: 'LOGIN',
+    userId: result.user.id,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+  },
+  'login success'
+);
+
+createAuditLog({
+  userId: result.user.id,
+  action: 'LOGIN',
+  ipAddress: req.ip,
+  userAgent: req.headers['user-agent'],
+}).catch((err) => req.log.error(err, 'audit log failed'));
     }
   );
 
