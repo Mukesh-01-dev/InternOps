@@ -19,7 +19,17 @@ async function getAuditLogs(limit, offset) {
 }
 
 async function logEvent(data) {
-  const { userId, action, resourceType, resourceId, details, oldValue, newValue, ipAddress, userAgent } = data || {};
+  const {
+    userId,
+    action,
+    resourceType,
+    resourceId,
+    details,
+    oldValue,
+    newValue,
+    ipAddress,
+    userAgent,
+  } = data || {};
   await pool.query(
     `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, old_value, new_value, ip_address, user_agent)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
@@ -40,7 +50,9 @@ async function logEvent(data) {
 async function performAdminCleanup() {
   const notifications = require('../notifications/repository'); // Lazy load
   if (notifications && typeof notifications.notifyAdmin === 'function') {
-    await notifications.notifyAdmin('Administrative audit cleanup has been completed.');
+    await notifications.notifyAdmin(
+      'Administrative audit cleanup has been completed.'
+    );
   }
 }
 
@@ -49,4 +61,3 @@ module.exports = {
   logEvent,
   performAdminCleanup,
 };
-
