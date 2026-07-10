@@ -1,21 +1,10 @@
 const redis = require('redis');
 const config = require('./index');
+const logger = require('../logger');
 
 let client = null;
 let clientPromise = null;
 let redisConnected = false;
-
-function getLogger() {
-  try {
-    const app = require('../app');
-    if (app && app.log) return app.log;
-  } catch (e) {}
-  return {
-    warn: (...args) => console.warn(...args),
-    info: (...args) => console.info(...args),
-    error: (...args) => console.error(...args),
-  };
-}
 
 function getSafeRedisError(err) {
   return {
@@ -59,8 +48,7 @@ async function getRedisClient() {
       const c = redis.createClient(redisOptions);
 
       c.on('error', (err) => {
-        const log = getLogger();
-        log.warn(
+        logger.warn(
           { err: getSafeRedisError(err), name: 'redis_error' },
           'Redis connection error'
         );
@@ -68,22 +56,19 @@ async function getRedisClient() {
 
       c.on('disconnect', () => {
         redisConnected = false;
-        const log = getLogger();
-        log.warn('Redis disconnected');
+        logger.warn('Redis disconnected');
       });
 
       c.on('connect', () => {
         redisConnected = true;
-        const log = getLogger();
-        log.info('Redis connected');
+        logger.info('Redis connected');
       });
 
       await c.connect();
       client = c;
       return client;
     } catch (err) {
-      const log = getLogger();
-      log.warn(
+      logger.warn(
         { err: getSafeRedisError(err), name: 'redis_unavailable' },
         'Redis unavailable - continuing without it'
       );
@@ -111,9 +96,7 @@ async function blacklistAccessToken(jti, ttl) {
   const client = await getRedisClient();
   if (!client) return;
 
-  await client.set(`blacklist:${jti}`, '1', {
-    EX: ttl,
-  });
+  await client.set(`blacklist:${jti}`, '1', { EX: ttl });
 }
 
 async function isAccessTokenBlacklisted(jti) {
