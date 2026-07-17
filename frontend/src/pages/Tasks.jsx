@@ -718,7 +718,9 @@ export default function Tasks() {
                                     .replace(/\\/g, '/')
                                     .replace(/^\/+/, '');
                                   const base = (
-                                    import.meta.env.VITE_API_BASE_URL || ''
+                                    import.meta.env.VITE_API_URL ||
+                                    import.meta.env.VITE_API_BASE_URL ||
+                                    ''
                                   ).replace(/\/+$/, '');
                                   const src = base
                                     ? `${base}/${normalized}`
