@@ -35,13 +35,23 @@ async function isTaskAssignedToUser(taskId, userId) {
     `SELECT 1 FROM social_tasks st
      WHERE st.id = $1 AND st.deleted_at IS NULL
        AND (
-         NOT EXISTS (SELECT 1 FROM task_assignments WHERE task_id = st.id AND deleted_at IS NULL)
-         OR EXISTS (SELECT 1 FROM task_assignments WHERE task_id = st.id AND user_id = $2 AND deleted_at IS NULL)
+         NOT EXISTS (
+           SELECT 1 FROM task_assignments
+           WHERE task_id = st.id AND deleted_at IS NULL
+         )
+         OR EXISTS (
+           SELECT 1 FROM task_assignments
+           WHERE task_id = st.id
+             AND user_id = $2
+             AND deleted_at IS NULL
+         )
        )`,
     [taskId, userId]
   );
+
   return res.rowCount > 0;
 }
+
 async function getAllInternEmails(limit = 500, offset = 0) {
   const res = await pool.query(
     `SELECT email
@@ -63,6 +73,7 @@ async function getInternEmailCount() {
      WHERE role IN ('INTERN', 'CAPTAIN')
        AND email IS NOT NULL`
   );
+
   return res.rows[0].count;
 }
 async function getTasks(filters, userId, userRole, page = 1, limit = 50) {
@@ -292,6 +303,7 @@ module.exports = {
   verifyProof,
   getProofsByTask,
   getProofsByIntern,
+
   getProof,
   deleteProof,
   getProofImage,
