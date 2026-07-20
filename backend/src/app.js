@@ -10,6 +10,8 @@ const metrics = require('./utils/metrics');
 const { initializeWebSocket, getIO } = require('./websocket');
 const noticesRoutes = require('./modules/notices/routes');
 const { getRedisStatus } = require('./config/redis');
+const authenticate = require('./middleware/auth');
+const rbac = require('./middleware/rbac');
 const { csrfMiddleware } = require('./middleware/csrf');
 const { sanitizationMiddleware } = require('./middleware/sanitize');
 const { createAuditLog } = require('./utils/audit');
@@ -54,7 +56,6 @@ app.get(
     return reply.send({ status: 'ok' });
   }
 );
-
 app.get(
   '/health/db',
   {
