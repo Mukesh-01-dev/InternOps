@@ -144,7 +144,10 @@ class EmailService {
     };
     const transporter = this.getTransporter();
     if (!transporter) {
-      logger.info({ to, subject }, '[Email] Placeholder — no transporter configured, skipping send');
+      logger.info(
+        { to, subject },
+        '[Email] Placeholder — no transporter configured, skipping send'
+      );
       metrics.sent++;
       return {
         messageId: 'console-' + Date.now(),

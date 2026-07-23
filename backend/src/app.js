@@ -21,7 +21,10 @@ const app = Fastify({
   trustProxy: config.nodeEnv === 'production' ? true : 'loopback',
   logger:
     config.nodeEnv === 'development'
-      ? { transport: { target: 'pino-pretty' }, level: process.env.LOG_LEVEL || 'info' }
+      ? {
+          transport: { target: 'pino-pretty' },
+          level: process.env.LOG_LEVEL || 'info',
+        }
       : { level: process.env.LOG_LEVEL || 'info' },
   bodyLimit: 1048576,
   genReqId: () => uuidv4(),
